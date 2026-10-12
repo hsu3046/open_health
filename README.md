@@ -30,4 +30,4 @@ cargo run --release -p oura-cli -- dashboard
 
 [Dashboard guide](dashboard/README.md) · [Algorithms](docs/algorithms/README.md) · [Architecture](docs/clients-web-and-ios.md)
 
-MIT licensed. See [LICENSE](LICENSE).
+Licensed under the [GNU GPL v3](LICENSE) (or later) © AIB Inc. ([aib.vote](https://www.aib.vote)). Forked from [Th0rgal/open_health](https://github.com/Th0rgal/open_health) (MIT — original notice kept in [LICENSE-MIT-upstream](LICENSE-MIT-upstream)); see [NOTICE](NOTICE).

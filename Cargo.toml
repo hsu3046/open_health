@@ -11,8 +11,8 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-license = "MIT"
-repository = "https://github.com/Th0rgal/open_health"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/hsu3046/open_health"
 
 [profile.release]
 lto = true
