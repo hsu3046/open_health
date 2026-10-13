@@ -1057,6 +1057,16 @@ struct RootView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
 
+                        // ring-health alerts from the shared brain: the ring was off or ran
+                        // out of battery, so "up to date" can still mean an empty night.
+                        // Only the last 3 days here; the device section lists all of them.
+                        let recentAlerts = s.ring_alerts.filter { a in
+                            a.end_unix.map { Date().timeIntervalSince1970 - Double($0) < 3 * 86_400 } ?? true
+                        }
+                        if !recentAlerts.isEmpty {
+                            RingAlertList(alerts: recentAlerts)
+                        }
+
                         // today — last night's sleep + that day's activity as one unit, the
                         // hero of the home; tap the sleep or the activity region for its report.
                         if let day = s.days.first {
@@ -1193,6 +1203,9 @@ struct RootView: View {
                             }
                             ObsStat(label: "synced",
                                     value: s.device.flatMap { d in d.synced.map { "\($0) \(d.synced_hm ?? "")" } } ?? "–")
+                        }
+                        if !s.ring_alerts.isEmpty {
+                            RingAlertList(alerts: s.ring_alerts, compact: true)
                         }
                         BuildStamp(prefix: s.device?.days_of_data.map { span in
                             let obs = s.device?.observed_days.map { " (\($0) observed)" } ?? ""

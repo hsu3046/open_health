@@ -1006,3 +1006,6 @@ body.page-open { overflow: hidden; }
 .be-cancel { background: transparent; color: var(--faint); border: 1px solid transparent; }
 .be-reset:hover, .be-cancel:hover { color: var(--text); }
 
+/* ring-health alerts reuse the clock note; on Today they lead the panel */
+.ring-alert { margin-top: 0; margin-bottom: 14px; }
+.ring-alert p { color: var(--text); }

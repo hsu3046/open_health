@@ -511,3 +511,45 @@ struct MovementRidge: View {
         .frame(height: height)
     }
 }
+
+/// Ring-health alerts (`Summary.ring_alerts`): hours the ring was powered off and
+/// battery-depletion restarts. The full card sits under the digest on Today — it is
+/// the reason an "up to date" sync shows an empty night — and `compact` repeats the
+/// whole list as plain lines in the device section.
+struct RingAlertList: View {
+    let alerts: [RingAlert]
+    var compact = false
+
+    private func icon(_ a: RingAlert) -> String {
+        a.cause == "battery" ? "battery.0percent" : "bolt.slash"
+    }
+
+    var body: some View {
+        if compact {
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(alerts, id: \.self) { a in
+                    Text("• \(a.message ?? "")").font(Obs.mono(11)).foregroundStyle(Obs.bad)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(alerts, id: \.self) { a in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Image(systemName: icon(a))
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Obs.alert)
+                        Text(a.message ?? "")
+                            .font(Obs.prose(14))
+                            .foregroundStyle(Obs.ink)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Obs.alert.opacity(0.45), lineWidth: 1))
+            .accessibilityElement(children: .combine)
+        }
+    }
+}

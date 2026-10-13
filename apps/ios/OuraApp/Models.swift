@@ -277,6 +277,19 @@ struct UndatedNight: Codable {
     var captured_unix: Int64?; var source: String?
     var reason: String?; var recoverable: Bool?
 }
+/// A ring-health alert from the shared brain (`ring_alerts`): the ring was powered
+/// off or ran out of battery, which is why a successful sync can bring back nothing.
+/// `message` is composed by the core so iOS and the web say the same thing.
+struct RingAlert: Codable, Hashable {
+    var kind: String?
+    var severity: String?
+    var cause: String?
+    var start_unix: Int64?
+    var end_unix: Int64?
+    var off_h: Double?
+    var gauge_unreliable: Bool?
+    var message: String?
+}
 struct Summary: Codable {
     var analysis_digest: String? = nil
     var analysis_version: Int? = nil
@@ -284,6 +297,7 @@ struct Summary: Codable {
     var device: Device?
     var nights: [NightRow] = []
     var clock: ClockDiag?
+    var ring_alerts: [RingAlert] = []
     var vitals = Vitals()
     var activity_profile: [String: [Double]] = [:]   // date → 96 × 15-min mean MET-above-rest
     var activity_daily: [String: DailyStat] = [:]     // date → steps / active-kcal / total-kcal
@@ -302,7 +316,7 @@ struct Summary: Codable {
     // out of decoding.
     enum CodingKeys: String, CodingKey {
         case analysis_digest, analysis_version
-        case digest, device, nights, clock, vitals, activity_profile, activity_daily, profile, cardio, fitness, error
+        case digest, device, nights, clock, ring_alerts, vitals, activity_profile, activity_daily, profile, cardio, fitness, error
         case symptoms
         case sleepDebt = "sleep_debt"
     }
@@ -319,6 +333,7 @@ struct Summary: Codable {
         device = try? c.decodeIfPresent(Device.self, forKey: .device)
         nights = (try? c.decodeIfPresent([NightRow].self, forKey: .nights)) ?? []
         clock = try? c.decodeIfPresent(ClockDiag.self, forKey: .clock)
+        ring_alerts = (try? c.decodeIfPresent([RingAlert].self, forKey: .ring_alerts)) ?? []
         vitals = (try? c.decodeIfPresent(Vitals.self, forKey: .vitals)) ?? Vitals()
         activity_profile = (try? c.decodeIfPresent([String: [Double]].self, forKey: .activity_profile)) ?? [:]
         activity_daily = (try? c.decodeIfPresent([String: DailyStat].self, forKey: .activity_daily)) ?? [:]

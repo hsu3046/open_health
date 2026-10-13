@@ -55,6 +55,7 @@ metric there once and both clients receive it in the JSON.
 | Previous days browser | `openDaysBrowser` → `openDayPage` | `AllDaysView` → `DayDetailView` | day keys | — |
 | Device & data health | `renderDevice` | device section | `device`, `streams` | — |
 | **Battery history** (level over the days with readings; charging runs drawn apart) | `renderDevice`→`batteryChart` | — | `device.battery_history` (`[unix, percent]`, 14 days) | — |
+| **Ring-health alerts** (hours the ring was powered off, battery-depletion restarts, a battery gauge that claimed ≥50% before running flat; message composed by the core) | `ringAlertNote` in `renderDay` (last 3 days) + `renderDevice` (all) | `RingAlertList` under the digest (last 3 days) + device section (all) (Components.swift) | `ring_alerts` (`oura-summary::ring_alerts`, from `RingClock::power_gaps`; 14 days) | — |
 
 ## The day is one unit — pair night + activity by *wake date*
 

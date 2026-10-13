@@ -145,6 +145,22 @@ enum Bracket {
     Erratic,
 }
 
+/// A stretch of wall-clock time the ring's counter did not see: it was powered off
+/// (battery brownout) between two anchors of one boot. Uses the same agreement
+/// tolerance as `bracket`, so a gap here is exactly what dating treats as a stall.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct PowerGap {
+    /// Best estimate of when the ring went off. With a single `ring_start` inside the
+    /// interval this is exact to the anchors' precision; otherwise it is the earlier
+    /// anchor (the off period lies somewhere between the two).
+    pub(crate) off_from_unix: f64,
+    pub(crate) off_until_unix: f64,
+    /// Wall-clock seconds the counter lost (always >= the agreement tolerance).
+    pub(crate) lost_s: f64,
+    /// The reboot that ended the gap, when exactly one was logged inside it.
+    pub(crate) boot_ds: Option<i64>,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Resolved {
     pub(crate) unix: f64,
@@ -448,6 +464,52 @@ impl RingClock {
             })
             .collect();
         serde_json::json!({ "epochs": epochs })
+    }
+
+    /// Every interval where the counter stalled between two consecutive anchors of a
+    /// boot (`Bracket::Stalled`), oldest first. A brownout keeps the counter but loses
+    /// wall time, so these are the hours the ring recorded nothing at all.
+    pub(crate) fn power_gaps(&self) -> Vec<PowerGap> {
+        let mut gaps = Vec::new();
+        for epoch in &self.epochs {
+            for pair in epoch.anchors.windows(2) {
+                let (prev, next) = (pair[0], pair[1]);
+                if next.0 == prev.0 {
+                    continue;
+                }
+                let wall_s = (next.1 - prev.1) as f64;
+                let counter_s = (next.0 - prev.0) as f64 / 10.0;
+                let tolerance = ANCHOR_AGREEMENT_S.max(counter_s * ANCHOR_AGREEMENT_FRACTION);
+                if wall_s <= counter_s + tolerance {
+                    continue;
+                }
+                let boots: Vec<i64> = epoch
+                    .boots
+                    .iter()
+                    .copied()
+                    .filter(|b| *b > prev.0 && *b <= next.0)
+                    .collect();
+                // One reboot pins the stall: the counter ran normally up to it (early
+                // side) and resumed from it (late side). Several reboots cannot be
+                // partitioned, so the whole interval is reported.
+                let (off_from_unix, off_until_unix, boot_ds) = match boots.as_slice() {
+                    [b] => (
+                        prev.1 as f64 + (b - prev.0) as f64 / 10.0,
+                        next.1 as f64 - (next.0 - b) as f64 / 10.0,
+                        Some(*b),
+                    ),
+                    _ => (prev.1 as f64, next.1 as f64, None),
+                };
+                gaps.push(PowerGap {
+                    off_from_unix,
+                    off_until_unix,
+                    lost_s: wall_s - counter_s,
+                    boot_ds,
+                });
+            }
+        }
+        gaps.sort_by(|a, b| a.off_from_unix.total_cmp(&b.off_from_unix));
+        gaps
     }
 
     /// How the anchors on either side of `ds` (sorted by ds) relate. Outside the

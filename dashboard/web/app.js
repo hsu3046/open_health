@@ -327,9 +327,26 @@ function fillDayHr(ymd, meta, strip) {
     .catch(() => { meta.textContent = "couldn't load"; });
 }
 
+// Ring-health alerts from the shared brain (d.ring_alerts): the ring was powered off or
+// ran out of battery, so a successful sync can still bring back an empty night. The
+// core composes the message so this and the iOS app say the same thing. `recentDays`
+// limits the list (Today shows the last 3 days; the device panel shows all).
+function ringAlertNote(d, recentDays) {
+  const nowS = Date.now() / 1000;
+  const alerts = (d.ring_alerts || []).filter((a) =>
+    recentDays == null || a.end_unix == null || nowS - a.end_unix < recentDays * 86400);
+  if (!alerts.length) return null;
+  const note = el("div", "clock-note ring-alert");
+  note.append(el("div", "clock-note-title", "Ring"));
+  for (const a of alerts) note.append(el("p", null, esc(a.message)));
+  return note;
+}
+
 function renderDay(d) {
   const box = $("day");
   box.innerHTML = "";
+  const alertNote = ringAlertNote(d, 3);
+  if (alertNote) box.append(alertNote);
   const days = dayKeys(d);
   // Nights the shared brain withheld because the ring clock could not be resolved
   // unambiguously (missing anchor, accelerated counter, or multi-reboot stall).
@@ -1559,6 +1576,8 @@ function renderDevice(d) {
   box.append(stats);
   const battery = batteryChart(dev.battery_history || []);
   if (battery) box.append(battery);
+  const alerts = ringAlertNote(d, null);
+  if (alerts) box.append(alerts);
 
   // left = data streams (what the ring is recording)
   const left = el("div");

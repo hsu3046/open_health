@@ -13,6 +13,7 @@
 //! `docs/clients-web-and-ios.md`.
 
 pub mod hourly_hr;
+mod ring_alerts;
 pub mod ring_time;
 pub mod sleep_score;
 pub mod symptoms;
@@ -2991,6 +2992,8 @@ pub fn build_summary(
         "tz": tz,
         "digest": digest,
         "clock": clock_diag,
+        // Power-off gaps and battery-depletion restarts: why a synced night can be empty.
+        "ring_alerts": ring_alerts::ring_alerts(&events, &clock, tz, oura_protocol::events::event_name),
         "device": device,
         "profile": demo.to_json(),
         "nights": nights_json,
