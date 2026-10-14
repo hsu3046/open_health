@@ -8,6 +8,9 @@
 > bonded device (Mac *and* iPhone) must "Forget This Device" or CoreBluetooth fails with
 > error 14 *Peer removed pairing information*.
 
+> **후속 기록:** 이 셋업 이후 "동기화는 되는데 데이터가 없는" 증상의 원인은 링 배터리 고장으로
+> 판정됐습니다 → [Gen 3 배터리 고장 진단 기록](gen3-battery-failure-observations.md)
+
 공식 Oura 앱이 구형 링의 동기화를 제대로 지원하지 않아, 링을 이 프로젝트(open_oura 기반)로
 옮기면서 겪은 실패와 해결 방법을 순서대로 정리한 문서입니다. 같은 길을 가는 사람이 같은
 함정을 다시 밟지 않도록, **증상 → 원인 → 해결**을 모두 남깁니다.

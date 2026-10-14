@@ -22,6 +22,7 @@ Ring communication and portable algorithms are powered by
 
 **Moving a ring off the official app** — [Gen 3 direct-sync setup notes](docs/gen3-direct-sync-setup.md):
 factory reset, own auth key, macOS Bluetooth permission, and every pairing pitfall we hit (Korean, English TL;DR).
+Synced but no data? See [Gen 3 battery-failure diagnosis](docs/gen3-battery-failure-observations.md) — how to tell a dying battery from the ring's own logs.
 
 **iOS** — [Build with Xcode](apps/ios/TESTFLIGHT.md) or [Xcode Cloud](apps/ios/XCODE_CLOUD.md).
 
